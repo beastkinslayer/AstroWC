@@ -63,7 +63,7 @@
     margin:0 auto;
     line-height:1.5;
   }
-
+ 
   .status-bar{
     display:flex;
     align-items:center;
@@ -93,7 +93,7 @@
     width:0%;
     transition:width .5s ease;
   }
-
+ 
   .stage-outer{
     position:relative;
     width:min(92vw,640px);
@@ -173,7 +173,7 @@
     transition:opacity .6s ease;
   }
   .champ-label.show{ opacity:1; }
-
+ 
   .pill{
     position:absolute;
     width:7.6%;
@@ -188,8 +188,13 @@
     z-index:2;
   }
   .pill .flag{
-    font-size:clamp(11px,2.6vw,16px);
-    line-height:1;
+    width:82%;
+    height:82%;
+    border-radius:50%;
+    object-fit:cover;
+    object-position:center;
+    display:block;
+    background:#1a1d28;
   }
   .pill.empty{
     border-style:dashed;
@@ -228,12 +233,12 @@
   }
   .pill.lvl-leaf .code{ display:block; }
   .pill:not(.lvl-leaf) .code{ display:none; }
-
+ 
   .ringline{ stroke:var(--ring-soft); stroke-width:.18; fill:none; }
   .tick{ stroke:var(--ring-soft); stroke-width:.25; }
   .branch{ stroke:var(--ring); stroke-width:.32; fill:none; transition:stroke .4s ease, opacity .4s ease; }
   .branch.lit{ stroke:var(--gold); opacity:.9; }
-
+ 
   .controls{
     display:flex; flex-wrap:wrap;
     gap:10px; justify-content:center;
@@ -266,7 +271,7 @@
     border-color:transparent;
     color:#1a1407;
   }
-
+ 
   .legend{
     display:flex; gap:18px; justify-content:center; flex-wrap:wrap;
     margin-top:18px;
@@ -277,7 +282,7 @@
   .dot.gold{ background:var(--gold-bright); }
   .dot.ember{ background:var(--ember); }
   .dot.gray{ background:var(--eliminated); }
-
+ 
   .footnote{
     text-align:center;
     font-size:11px;
@@ -288,7 +293,7 @@
     opacity:.8;
   }
   .footnote b{ color:var(--ink); }
-
+ 
   @media (max-width:480px){
     .pill{ width:8.6%; }
     .pill .code{ display:none !important; }
@@ -311,7 +316,7 @@
     <div class="status-text" id="statusText">Loading…</div>
     <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
   </div>
-
+ 
   <div class="stage-outer" id="stageOuter">
     <div class="stage" id="stage">
       <svg class="rings" id="ringsSvg" viewBox="0 0 100 100"></svg>
@@ -321,13 +326,13 @@
       <div class="champ-label" id="champLabel"></div>
     </div>
   </div>
-
+ 
   <div class="controls">
     <button class="primary" id="spinBtn">Spin the wheel</button>
     <button class="toggle" id="autoBtn">Auto-play</button>
     <button class="ghost" id="resetBtn">Reset</button>
   </div>
-
+ 
   <div class="legend">
     <span><i class="dot ember"></i>Awaiting your call</span>
     <span><i class="dot gold"></i>Through to the next round</span>
@@ -342,41 +347,41 @@
   "use strict";
 
   // ---------- DATA ----------
-  const TEAMS = {
-    ger:{name:'Germany',code:'GER',flag:'🇩🇪'},
-    par:{name:'Paraguay',code:'PAR',flag:'🇵🇾'},
-    fra:{name:'France',code:'FRA',flag:'🇫🇷'},
-    swe:{name:'Sweden',code:'SWE',flag:'🇸🇪'},
-    rsa:{name:'South Africa',code:'RSA',flag:'🇿🇦'},
-    can:{name:'Canada',code:'CAN',flag:'🇨🇦'},
-    ned:{name:'Netherlands',code:'NED',flag:'🇳🇱'},
-    mar:{name:'Morocco',code:'MAR',flag:'🇲🇦'},
-    por:{name:'Portugal',code:'POR',flag:'🇵🇹'},
-    cro:{name:'Croatia',code:'CRO',flag:'🇭🇷'},
-    esp:{name:'Spain',code:'ESP',flag:'🇪🇸'},
-    aut:{name:'Austria',code:'AUT',flag:'🇦🇹'},
-    usa:{name:'USA',code:'USA',flag:'🇺🇸'},
-    bih:{name:'Bosnia & H.',code:'BIH',flag:'🇧🇦'},
-    bel:{name:'Belgium',code:'BEL',flag:'🇧🇪'},
-    sen:{name:'Senegal',code:'SEN',flag:'🇸🇳'},
-    bra:{name:'Brazil',code:'BRA',flag:'🇧🇷'},
-    jpn:{name:'Japan',code:'JPN',flag:'🇯🇵'},
-    civ:{name:"Côte d'Ivoire",code:'CIV',flag:'🇨🇮'},
-    nor:{name:'Norway',code:'NOR',flag:'🇳🇴'},
-    mex:{name:'Mexico',code:'MEX',flag:'🇲🇽'},
-    ecu:{name:'Ecuador',code:'ECU',flag:'🇪🇨'},
-    eng:{name:'England',code:'ENG',flag:'🇬🇧'},
-    cod:{name:'DR Congo',code:'COD',flag:'🇨🇩'},
-    arg:{name:'Argentina',code:'ARG',flag:'🇦🇷'},
-    cpv:{name:'Cape Verde',code:'CPV',flag:'🇨🇻'},
-    aus:{name:'Australia',code:'AUS',flag:'🇦🇺'},
-    egy:{name:'Egypt',code:'EGY',flag:'🇪🇬'},
-    sui:{name:'Switzerland',code:'SUI',flag:'🇨🇭'},
-    alg:{name:'Algeria',code:'ALG',flag:'🇩🇿'},
-    col:{name:'Colombia',code:'COL',flag:'🇨🇴'},
-    gha:{name:'Ghana',code:'GHA',flag:'🇬🇭'}
+   const TEAMS = {
+    ger:{name:'Germany',code:'GER',flag:'🇩🇪',iso:'de'},
+    par:{name:'Paraguay',code:'PAR',flag:'🇵🇾',iso:'py'},
+    fra:{name:'France',code:'FRA',flag:'🇫🇷',iso:'fr'},
+    swe:{name:'Sweden',code:'SWE',flag:'🇸🇪',iso:'se'},
+    rsa:{name:'South Africa',code:'RSA',flag:'🇿🇦',iso:'za'},
+    can:{name:'Canada',code:'CAN',flag:'🇨🇦',iso:'ca'},
+    ned:{name:'Netherlands',code:'NED',flag:'🇳🇱',iso:'nl'},
+    mar:{name:'Morocco',code:'MAR',flag:'🇲🇦',iso:'ma'},
+    por:{name:'Portugal',code:'POR',flag:'🇵🇹',iso:'pt'},
+    cro:{name:'Croatia',code:'CRO',flag:'🇭🇷',iso:'hr'},
+    esp:{name:'Spain',code:'ESP',flag:'🇪🇸',iso:'es'},
+    aut:{name:'Austria',code:'AUT',flag:'🇦🇹',iso:'at'},
+    usa:{name:'USA',code:'USA',flag:'🇺🇸',iso:'us'},
+    bih:{name:'Bosnia & H.',code:'BIH',flag:'🇧🇦',iso:'ba'},
+    bel:{name:'Belgium',code:'BEL',flag:'🇧🇪',iso:'be'},
+    sen:{name:'Senegal',code:'SEN',flag:'🇸🇳',iso:'sn'},
+    bra:{name:'Brazil',code:'BRA',flag:'🇧🇷',iso:'br'},
+    jpn:{name:'Japan',code:'JPN',flag:'🇯🇵',iso:'jp'},
+    civ:{name:"Côte d'Ivoire",code:'CIV',flag:'🇨🇮',iso:'ci'},
+    nor:{name:'Norway',code:'NOR',flag:'🇳🇴',iso:'no'},
+    mex:{name:'Mexico',code:'MEX',flag:'🇲🇽',iso:'mx'},
+    ecu:{name:'Ecuador',code:'ECU',flag:'🇪🇨',iso:'ec'},
+    eng:{name:'England',code:'ENG',flag:'🏴',iso:'gb-eng'},
+    cod:{name:'DR Congo',code:'COD',flag:'🇨🇩',iso:'cd'},
+    arg:{name:'Argentina',code:'ARG',flag:'🇦🇷',iso:'ar'},
+    cpv:{name:'Cape Verde',code:'CPV',flag:'🇨🇻',iso:'cv'},
+    aus:{name:'Australia',code:'AUS',flag:'🇦🇺',iso:'au'},
+    egy:{name:'Egypt',code:'EGY',flag:'🇪🇬',iso:'eg'},
+    sui:{name:'Switzerland',code:'SUI',flag:'🇨🇭',iso:'ch'},
+    alg:{name:'Algeria',code:'ALG',flag:'🇩🇿',iso:'dz'},
+    col:{name:'Colombia',code:'COL',flag:'🇨🇴',iso:'co'},
+    gha:{name:'Ghana',code:'GHA',flag:'🇬🇭',iso:'gh'}
   };
-
+ 
   // Nested bracket: leaf-pairs are the real Round-of-32 fixtures; each
   // further level of nesting is the next round. R32 pairings follow the
   // official fixture list. R16+ groupings follow the standard sequential
@@ -392,7 +397,7 @@
       [ [['arg','cpv'],['aus','egy']], [['sui','alg'],['col','gha']] ]
     ]
   ];
-
+ 
   // Real, already-played results — locked, survive Reset.
   const PRESET_RESULTS = [
     { teams:['ger','par'], winner:'par', note:'1–1 (4–3 pens)' },
@@ -421,11 +426,11 @@
   const R_OUTER = 45, RING_STEP = 9; // percent units
   const radiusForLevel = lvl => R_OUTER - lvl*RING_STEP; // lvl 0 = leaf
 
-  // ---------- BUILD TREE ----------
+ // ---------- BUILD TREE ----------
   let matchCounter = 0;
   const allMatches = [];   // every match node, in build order
   const allLeaves = [];    // leaf nodes, in circular order
-
+ 
   function findPreset(teamA, teamB){
     return PRESET_RESULTS.find(p=>{
       const s = p.teams.slice().sort().join('|');
@@ -433,7 +438,7 @@
       return s===t;
     });
   }
-
+ 
   function build(node){
     if (typeof node === 'string'){
       const leaf = { kind:'leaf', team:node, angle:0 };
@@ -452,7 +457,7 @@
     return match;
   }
   const ROOT = build(BRACKET_RAW);
-
+ 
   // Leaf angles, evenly spaced clockwise from the top.
   allLeaves.forEach((leaf, i)=>{
     leaf.angle = -90 + i * (360/allLeaves.length);
@@ -466,11 +471,11 @@
     return node.angle;
   }
   computeAngle(ROOT);
-
+ 
   function resolvedTeam(node){
     return node.kind==='leaf' ? node.team : node.winner;
   }
-
+ 
   // Map every node -> its parent match (root has none).
   const parentOf = new Map();
   (function link(node){
@@ -478,13 +483,13 @@
       node.kids.forEach(k=>{ parentOf.set(k, node); link(k); });
     }
   })(ROOT);
-
+ 
   // ---------- ROTATION STATE ----------
   let discRotation = 0;
   let spinning = false;
   let hovering = false;
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
+ 
   // ---------- DOM SETUP ----------
   const svg = document.getElementById('ringsSvg');
   const pillsLayer = document.getElementById('pillsLayer');
@@ -496,10 +501,10 @@
   const spinBtn = document.getElementById('spinBtn');
   const autoBtn = document.getElementById('autoBtn');
   const resetBtn = document.getElementById('resetBtn');
-
+ 
   stageOuter.addEventListener('mouseenter', ()=> hovering = true);
   stageOuter.addEventListener('mouseleave', ()=> hovering = false);
-
+ 
   // Static decorative guide circles + tick marks (built once).
   const ns = 'http://www.w3.org/2000/svg';
   function svgEl(tag, attrs){
@@ -527,13 +532,15 @@
   const branchGroup = svgEl('g', { id:'branchGroup' });
   rotatingGroup.appendChild(branchGroup);
   svg.appendChild(rotatingGroup);
-
+ 
   // Pre-create one HTML pill per node.
   function makePillEl(node){
     const el = document.createElement('div');
     el.className = 'pill' + (node.kind==='leaf' ? ' lvl-leaf' : '');
-    const flag = document.createElement('div');
+    const flag = document.createElement('img');
     flag.className = 'flag';
+    flag.alt = '';
+    flag.loading = 'eager';
     el.appendChild(flag);
     const code = document.createElement('div');
     code.className = 'code';
@@ -544,7 +551,7 @@
   const pillRecords = [];
   allLeaves.forEach(leaf => pillRecords.push(makePillEl(leaf)));
   allMatches.forEach(m => pillRecords.push(makePillEl(m)));
-
+ 
   // Pre-create branch lines: one pair (kid0->match, kid1->match) per match.
   const branchLines = [];
   allMatches.forEach(m=>{
@@ -554,7 +561,7 @@
       branchLines.push({ match:m, kid, line });
     });
   });
-
+ 
   // ---------- RENDER ----------
   function nodeRadius(node){
     return node.kind==='leaf' ? R_OUTER : radiusForLevel(node.level);
@@ -569,7 +576,7 @@
     const mx = (p1.x+p2.x)/2, my = (p1.y+p2.y)/2;
     return `M ${p1.x} ${p1.y} Q ${mx} ${my} ${p2.x} ${p2.y}`;
   }
-
+ 
   function isEliminated(node){
     const parent = parentOf.get(node);
     if (!parent || !parent.winner) return false;
@@ -581,7 +588,7 @@
     const other = parent.kids.find(k=>k!==node);
     return resolvedTeam(node)!=null && resolvedTeam(other)!=null;
   }
-
+ 
   function extraInfo(node){
     // Leaves belonging to a Round-of-32 fixture: show kickoff or result.
     const parent = parentOf.get(node);
@@ -596,7 +603,7 @@
     }
     return '';
   }
-
+ 
   function render(){
     // position pills
     pillRecords.forEach(rec=>{
@@ -604,24 +611,26 @@
       const pos = nodePos(node, discRotation);
       el.style.left = pos.x + '%';
       el.style.top = pos.y + '%';
-
+ 
       const team = resolvedTeam(node);
       el.classList.toggle('empty', team==null);
       el.classList.toggle('decided', node.kind==='match' && !!node.winner);
       el.classList.toggle('eliminated', isEliminated(node));
       el.classList.toggle('clickable', !spinning && isClickable(node));
-
+ 
       if (team){
-        flag.textContent = TEAMS[team].flag;
+        flag.src = 'https://flagcdn.com/w80/' + TEAMS[team].iso + '.png';
+        flag.alt = TEAMS[team].name;
         code.textContent = TEAMS[team].code;
         el.title = TEAMS[team].name + extraInfo(node);
       } else {
-        flag.textContent = '';
+        flag.removeAttribute('src');
+        flag.alt = '';
         code.textContent = '';
         el.title = '';
       }
     });
-
+ 
     // position branch lines
     branchLines.forEach(b=>{
       const p1 = nodePos(b.kid, discRotation);
@@ -630,22 +639,22 @@
       const lit = resolvedTeam(b.kid)!=null && b.match.winner === resolvedTeam(b.kid);
       b.line.classList.toggle('lit', !!lit);
     });
-
+ 
     // champion / center
     const champ = ROOT.winner;
     centerMedal.classList.toggle('champion', !!champ);
     if (champ){
-      champLabel.textContent = TEAMS[champ].flag + ' ' + TEAMS[champ].name;
+      champLabel.innerHTML = '<img src="https://flagcdn.com/w40/' + TEAMS[champ].iso + '.png" alt="" style="width:16px;height:12px;border-radius:2px;vertical-align:-1px;margin-right:5px;"> ' + TEAMS[champ].name;
       champLabel.classList.add('show');
     } else {
       champLabel.classList.remove('show');
     }
-
+ 
     // status + progress
     const total = allMatches.length;
     const decided = allMatches.filter(m=>m.winner).length;
     progressFill.style.width = (decided/total*100).toFixed(1) + '%';
-
+ 
     if (champ){
       statusText.innerHTML = '<b>' + TEAMS[champ].name + '</b> lifts the trophy.';
     } else {
@@ -658,11 +667,11 @@
       const roundLabel = lvl ? ROUND_NAMES[lvl] : '—';
       statusText.innerHTML = '<b>' + roundLabel + '</b> · ' + decided + ' / ' + total + ' matches decided';
     }
-
+ 
     spinBtn.disabled = spinning || !!champ || frontierCount()===0;
     autoBtn.disabled = !!champ && !autoPlaying;
   }
-
+ 
   function frontierCount(){
     return allMatches.filter(m=>{
       if (m.winner) return false;
@@ -670,7 +679,7 @@
       return resolvedTeam(a)!=null && resolvedTeam(b)!=null;
     }).length;
   }
-
+ 
   // ---------- INTERACTION ----------
   pillsLayer.addEventListener('click', (e)=>{
     const el = e.target.closest('.pill');
@@ -683,11 +692,11 @@
     decide(parent, resolvedTeam(node));
     render();
   });
-
+ 
   function decide(match, winnerTeam){
     match.winner = winnerTeam;
   }
-
+ 
   function resolveFrontierRandomly(){
     const frontier = allMatches.filter(m=>{
       if (m.winner) return false;
@@ -701,10 +710,10 @@
     });
     return frontier.length;
   }
-
+ 
   // ---------- SPIN ANIMATION ----------
   function easeOutCubic(t){ return 1 - Math.pow(1-t, 3); }
-
+ 
   function spinDisc(){
     return new Promise(resolve=>{
       if (frontierCount()===0){ resolve(); return; }
@@ -730,12 +739,12 @@
       requestAnimationFrame(step);
     });
   }
-
+ 
   spinBtn.addEventListener('click', ()=>{
     if (spinning) return;
     spinDisc();
   });
-
+ 
   let autoPlaying = false;
   autoBtn.addEventListener('click', async ()=>{
     autoPlaying = !autoPlaying;
@@ -751,7 +760,7 @@
       autoBtn.textContent = 'Auto-play';
     }
   });
-
+ 
   resetBtn.addEventListener('click', ()=>{
     autoPlaying = false;
     autoBtn.classList.remove('on');
@@ -760,7 +769,7 @@
     discRotation = 0;
     render();
   });
-
+ 
   // ---------- AMBIENT IDLE ROTATION ----------
   let lastT = performance.now();
   function idleLoop(now){
@@ -773,7 +782,7 @@
     requestAnimationFrame(idleLoop);
   }
   requestAnimationFrame(idleLoop);
-
+ 
   render();
 })();
 </script>
