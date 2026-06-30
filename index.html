@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Cup 2026 — Wheel of Fate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c14;
+    --bg2:#0d0a06;
+    --ring:#2b3245;
+    --ring-soft:#1c2233;
+    --gold:#c9a961;
+    --gold-bright:#f2c75c;
+    --ember:#e0654a;
+    --ink:#ece7da;
+    --mist:#7c8499;
+    --eliminated:#3a3f4d;
+  }
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; padding:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100%;
+    overflow-x:hidden;
+  }
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+    padding:28px 16px 48px;
+  }
+  header{
+    text-align:center;
+    margin-bottom:18px;
+  }
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--gold);
+    opacity:.85;
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:'Cinzel',serif;
+    font-weight:600;
+    font-size:clamp(22px,4.4vw,34px);
+    margin:0 0 6px;
+    letter-spacing:.02em;
+    background:linear-gradient(180deg,#fff4d8,var(--gold) 70%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .sub{
+    font-size:13px;
+    color:var(--mist);
+    max-width:520px;
+    margin:0 auto;
+    line-height:1.5;
+  }
+
+  .status-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:20px auto 6px;
+    max-width:640px;
+    padding:10px 16px;
+    border:1px solid var(--ring);
+    border-radius:999px;
+    background:linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+  }
+  .status-text{ font-size:12.5px; color:var(--ink); }
+  .status-text b{ color:var(--gold-bright); font-weight:600; }
+  .progress-track{
+    flex:1 1 120px;
+    height:4px;
+    border-radius:2px;
+    background:var(--ring-soft);
+    overflow:hidden;
+    min-width:80px;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--ember),var(--gold-bright));
+    width:0%;
+    transition:width .5s ease;
+  }
+
+  .stage-outer{
+    position:relative;
+    width:min(92vw,640px);
+    aspect-ratio:1/1;
+    margin:26px auto 8px;
+  }
+  .stage{
+    position:absolute; inset:0;
+    border-radius:50%;
+  }
+  .stage::before{
+    content:"";
+    position:absolute; inset:-4%;
+    border-radius:50%;
+    background:radial-gradient(circle at 50% 50%, rgba(242,199,92,.10), transparent 60%);
+    pointer-events:none;
+  }
+  svg.rings{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    overflow:visible;
+  }
+  .pills{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+  }
+  .pointer{
+    position:absolute;
+    top:-2.4%; left:50%;
+    width:0; height:0;
+    transform:translateX(-50%);
+    border-left:7px solid transparent;
+    border-right:7px solid transparent;
+    border-top:12px solid var(--gold-bright);
+    filter:drop-shadow(0 0 6px rgba(242,199,92,.6));
+    z-index:5;
+  }
+  .center-medal{
+    position:absolute;
+    top:50%; left:50%;
+    width:15%; height:15%;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle, rgba(242,199,92,.22), rgba(242,199,92,0) 70%);
+    z-index:4;
+    pointer-events:none;
+  }
+  .center-medal .trophy{
+    font-size:clamp(20px,5vw,30px);
+    filter:drop-shadow(0 0 8px rgba(242,199,92,.55));
+    animation:pulse 3.4s ease-in-out infinite;
+  }
+  .center-medal.champion .trophy{
+    animation:champPulse 1.6s ease-in-out infinite;
+    font-size:clamp(28px,7vw,42px);
+  }
+  @keyframes pulse{
+    0%,100%{ transform:scale(1); opacity:.85; }
+    50%{ transform:scale(1.08); opacity:1; }
+  }
+  @keyframes champPulse{
+    0%,100%{ transform:scale(1); filter:drop-shadow(0 0 10px rgba(242,199,92,.6)); }
+    50%{ transform:scale(1.18); filter:drop-shadow(0 0 22px rgba(242,199,92,.95)); }
+  }
+  .champ-label{
+    position:absolute;
+    top:67%; left:50%;
+    transform:translateX(-50%);
+    font-family:'Cinzel',serif;
+    font-size:11px;
+    letter-spacing:.18em;
+    color:var(--gold-bright);
+    white-space:nowrap;
+    text-transform:uppercase;
+    opacity:0;
+    transition:opacity .6s ease;
+  }
+  .champ-label.show{ opacity:1; }
+
+  .pill{
+    position:absolute;
+    width:7.6%;
+    aspect-ratio:1/1;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:#11141f;
+    border:1.4px solid var(--ring);
+    cursor:default;
+    transition:border-color .35s ease, box-shadow .35s ease, filter .5s ease, opacity .5s ease, background .35s ease;
+    z-index:2;
+  }
+  .pill .flag{
+    font-size:clamp(11px,2.6vw,16px);
+    line-height:1;
+  }
+  .pill.empty{
+    border-style:dashed;
+    border-color:var(--ring-soft);
+    background:transparent;
+  }
+  .pill.decided{
+    border-color:var(--gold);
+    box-shadow:0 0 10px rgba(201,169,97,.35);
+  }
+  .pill.eliminated{
+    filter:grayscale(1) brightness(.55);
+    opacity:.45;
+  }
+  .pill.clickable{
+    cursor:pointer;
+    border-color:var(--ember);
+    box-shadow:0 0 0 0 rgba(224,101,74,.5);
+    animation:invite 2.2s ease-in-out infinite;
+  }
+  .pill.clickable:hover{
+    border-color:var(--gold-bright);
+    box-shadow:0 0 14px rgba(242,199,92,.55);
+  }
+  @keyframes invite{
+    0%,100%{ box-shadow:0 0 0 0 rgba(224,101,74,.35); }
+    50%{ box-shadow:0 0 9px 2px rgba(224,101,74,.45); }
+  }
+  .pill .code{
+    position:absolute;
+    bottom:-15px;
+    font-size:7.5px;
+    letter-spacing:.04em;
+    color:var(--mist);
+    white-space:nowrap;
+  }
+  .pill.lvl-leaf .code{ display:block; }
+  .pill:not(.lvl-leaf) .code{ display:none; }
+
+  .ringline{ stroke:var(--ring-soft); stroke-width:.18; fill:none; }
+  .tick{ stroke:var(--ring-soft); stroke-width:.25; }
+  .branch{ stroke:var(--ring); stroke-width:.32; fill:none; transition:stroke .4s ease, opacity .4s ease; }
+  .branch.lit{ stroke:var(--gold); opacity:.9; }
+
+  .controls{
+    display:flex; flex-wrap:wrap;
+    gap:10px; justify-content:center;
+    margin:26px auto 4px;
+  }
+  button{
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:.01em;
+    padding:11px 20px;
+    border-radius:999px;
+    border:1px solid var(--ring);
+    background:#11141f;
+    color:var(--ink);
+    cursor:pointer;
+    transition:transform .15s ease, border-color .25s ease, background .25s ease, opacity .25s ease;
+  }
+  button:hover:not(:disabled){ transform:translateY(-1px); border-color:var(--gold); }
+  button:active:not(:disabled){ transform:translateY(0); }
+  button:disabled{ opacity:.35; cursor:not-allowed; }
+  button.primary{
+    background:linear-gradient(180deg,#e0764a,var(--ember));
+    border-color:transparent;
+    color:#1a0d08;
+  }
+  button.ghost{ background:transparent; }
+  button.toggle.on{
+    background:linear-gradient(180deg,#f2c75c,var(--gold));
+    border-color:transparent;
+    color:#1a1407;
+  }
+
+  .legend{
+    display:flex; gap:18px; justify-content:center; flex-wrap:wrap;
+    margin-top:18px;
+    font-size:11px; color:var(--mist);
+  }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .dot.gold{ background:var(--gold-bright); }
+  .dot.ember{ background:var(--ember); }
+  .dot.gray{ background:var(--eliminated); }
+
+  .footnote{
+    text-align:center;
+    font-size:11px;
+    color:var(--mist);
+    max-width:560px;
+    margin:22px auto 0;
+    line-height:1.6;
+    opacity:.8;
+  }
+  .footnote b{ color:var(--ink); }
+
+  @media (max-width:480px){
+    .pill{ width:8.6%; }
+    .pill .code{ display:none !important; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .center-medal .trophy{ animation:none; }
+    .pill.clickable{ animation:none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">2026 World Cup · Round of 32</div>
+    <h1>The Wheel of Fate</h1>
+    <p class="sub">Tap a team to send them through by hand, or let the wheel spin and decide for you. The disc turns; the bracket holds.</p>
+  </header>
+
+  <div class="status-bar">
+    <div class="status-text" id="statusText">Loading…</div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="stage-outer" id="stageOuter">
+    <div class="stage" id="stage">
+      <svg class="rings" id="ringsSvg" viewBox="0 0 100 100"></svg>
+      <div class="pills" id="pillsLayer"></div>
+      <div class="pointer"></div>
+      <div class="center-medal" id="centerMedal"><div class="trophy">🏆</div></div>
+      <div class="champ-label" id="champLabel"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="primary" id="spinBtn">Spin the wheel</button>
+    <button class="toggle" id="autoBtn">Auto-play</button>
+    <button class="ghost" id="resetBtn">Reset</button>
+  </div>
+
+  <div class="legend">
+    <span><i class="dot ember"></i>Awaiting your call</span>
+    <span><i class="dot gold"></i>Through to the next round</span>
+    <span><i class="dot gray"></i>Eliminated</span>
+  </div>
+
+  <p class="footnote"> created by Chrys.Pyro </p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- DATA ----------
+  const TEAMS = {
+    ger:{name:'Germany',code:'GER',flag:'🇩🇪'},
+    par:{name:'Paraguay',code:'PAR',flag:'🇵🇾'},
+    fra:{name:'France',code:'FRA',flag:'🇫🇷'},
+    swe:{name:'Sweden',code:'SWE',flag:'🇸🇪'},
+    rsa:{name:'South Africa',code:'RSA',flag:'🇿🇦'},
+    can:{name:'Canada',code:'CAN',flag:'🇨🇦'},
+    ned:{name:'Netherlands',code:'NED',flag:'🇳🇱'},
+    mar:{name:'Morocco',code:'MAR',flag:'🇲🇦'},
+    por:{name:'Portugal',code:'POR',flag:'🇵🇹'},
+    cro:{name:'Croatia',code:'CRO',flag:'🇭🇷'},
+    esp:{name:'Spain',code:'ESP',flag:'🇪🇸'},
+    aut:{name:'Austria',code:'AUT',flag:'🇦🇹'},
+    usa:{name:'USA',code:'USA',flag:'🇺🇸'},
+    bih:{name:'Bosnia & H.',code:'BIH',flag:'🇧🇦'},
+    bel:{name:'Belgium',code:'BEL',flag:'🇧🇪'},
+    sen:{name:'Senegal',code:'SEN',flag:'🇸🇳'},
+    bra:{name:'Brazil',code:'BRA',flag:'🇧🇷'},
+    jpn:{name:'Japan',code:'JPN',flag:'🇯🇵'},
+    civ:{name:"Côte d'Ivoire",code:'CIV',flag:'🇨🇮'},
+    nor:{name:'Norway',code:'NOR',flag:'🇳🇴'},
+    mex:{name:'Mexico',code:'MEX',flag:'🇲🇽'},
+    ecu:{name:'Ecuador',code:'ECU',flag:'🇪🇨'},
+    eng:{name:'England',code:'ENG',flag:'🇬🇧'},
+    cod:{name:'DR Congo',code:'COD',flag:'🇨🇩'},
+    arg:{name:'Argentina',code:'ARG',flag:'🇦🇷'},
+    cpv:{name:'Cape Verde',code:'CPV',flag:'🇨🇻'},
+    aus:{name:'Australia',code:'AUS',flag:'🇦🇺'},
+    egy:{name:'Egypt',code:'EGY',flag:'🇪🇬'},
+    sui:{name:'Switzerland',code:'SUI',flag:'🇨🇭'},
+    alg:{name:'Algeria',code:'ALG',flag:'🇩🇿'},
+    col:{name:'Colombia',code:'COL',flag:'🇨🇴'},
+    gha:{name:'Ghana',code:'GHA',flag:'🇬🇭'}
+  };
+
+  // Nested bracket: leaf-pairs are the real Round-of-32 fixtures; each
+  // further level of nesting is the next round. R32 pairings follow the
+  // official fixture list. R16+ groupings follow the standard sequential
+  // bracket convention (confirmed correct for Canada, whose R16 opponent
+  // is the Morocco/Netherlands winner).
+  const BRACKET_RAW = [
+    [
+      [ [['ger','par'],['fra','swe']], [['rsa','can'],['ned','mar']] ],
+      [ [['por','cro'],['esp','aut']], [['usa','bih'],['bel','sen']] ]
+    ],
+    [
+      [ [['bra','jpn'],['civ','nor']], [['mex','ecu'],['eng','cod']] ],
+      [ [['arg','cpv'],['aus','egy']], [['sui','alg'],['col','gha']] ]
+    ]
+  ];
+
+  // Real, already-played results — locked, survive Reset.
+  const PRESET_RESULTS = [
+    { teams:['ger','par'], winner:'par', note:'1–1 (4–3 pens)' },
+    { teams:['rsa','can'], winner:'can', note:'0–1' },
+    { teams:['ned','mar'], winner:'mar', note:'1–1 (3–2 pens)' },
+    { teams:['bra','jpn'], winner:'bra', note:'2–1' }
+  ];
+
+  // Kickoff info for matches not yet played, shown on hover.
+  const KICKOFF = {
+    'fra|swe':'Tomorrow · 00:00',
+    'por|cro':'3 Jul · 02:00',
+    'aut|esp':'2 Jul · 22:00',
+    'bih|usa':'2 Jul · 03:00',
+    'bel|sen':'Tomorrow · 23:00',
+    'civ|nor':'Today · 20:00',
+    'ecu|mex':'Tomorrow · 04:00',
+    'cod|eng':'Tomorrow · 19:00',
+    'arg|cpv':'4 Jul · 01:00',
+    'aus|egy':'3 Jul · 21:00',
+    'alg|sui':'3 Jul · 06:00',
+    'col|gha':'4 Jul · 04:30'
+  };
+
+  const ROUND_NAMES = { 1:'Round of 32', 2:'Round of 16', 3:'Quarterfinals', 4:'Semifinals', 5:'Final' };
+  const R_OUTER = 45, RING_STEP = 9; // percent units
+  const radiusForLevel = lvl => R_OUTER - lvl*RING_STEP; // lvl 0 = leaf
+
+  // ---------- BUILD TREE ----------
+  let matchCounter = 0;
+  const allMatches = [];   // every match node, in build order
+  const allLeaves = [];    // leaf nodes, in circular order
+
+  function findPreset(teamA, teamB){
+    return PRESET_RESULTS.find(p=>{
+      const s = p.teams.slice().sort().join('|');
+      const t = [teamA,teamB].slice().sort().join('|');
+      return s===t;
+    });
+  }
+
+  function build(node){
+    if (typeof node === 'string'){
+      const leaf = { kind:'leaf', team:node, angle:0 };
+      allLeaves.push(leaf);
+      return leaf;
+    }
+    const a = build(node[0]);
+    const b = build(node[1]);
+    const level = Math.max(a.kind==='leaf'?0:a.level, b.kind==='leaf'?0:b.level) + 1;
+    const match = { kind:'match', id:'m'+(matchCounter++), level, kids:[a,b], winner:null, locked:false };
+    if (a.kind==='leaf' && b.kind==='leaf'){
+      const preset = findPreset(a.team, b.team);
+      if (preset){ match.winner = preset.winner; match.locked = true; }
+    }
+    allMatches.push(match);
+    return match;
+  }
+  const ROOT = build(BRACKET_RAW);
+
+  // Leaf angles, evenly spaced clockwise from the top.
+  allLeaves.forEach((leaf, i)=>{
+    leaf.angle = -90 + i * (360/allLeaves.length);
+  });
+  // Match angle = midpoint of its two kids' angles (computed bottom-up).
+  function computeAngle(node){
+    if (node.kind==='leaf') return node.angle;
+    const a = computeAngle(node.kids[0]);
+    const b = computeAngle(node.kids[1]);
+    node.angle = (a+b)/2;
+    return node.angle;
+  }
+  computeAngle(ROOT);
+
+  function resolvedTeam(node){
+    return node.kind==='leaf' ? node.team : node.winner;
+  }
+
+  // Map every node -> its parent match (root has none).
+  const parentOf = new Map();
+  (function link(node){
+    if (node.kind==='match'){
+      node.kids.forEach(k=>{ parentOf.set(k, node); link(k); });
+    }
+  })(ROOT);
+
+  // ---------- ROTATION STATE ----------
+  let discRotation = 0;
+  let spinning = false;
+  let hovering = false;
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- DOM SETUP ----------
+  const svg = document.getElementById('ringsSvg');
+  const pillsLayer = document.getElementById('pillsLayer');
+  const stageOuter = document.getElementById('stageOuter');
+  const statusText = document.getElementById('statusText');
+  const progressFill = document.getElementById('progressFill');
+  const centerMedal = document.getElementById('centerMedal');
+  const champLabel = document.getElementById('champLabel');
+  const spinBtn = document.getElementById('spinBtn');
+  const autoBtn = document.getElementById('autoBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  stageOuter.addEventListener('mouseenter', ()=> hovering = true);
+  stageOuter.addEventListener('mouseleave', ()=> hovering = false);
+
+  // Static decorative guide circles + tick marks (built once).
+  const ns = 'http://www.w3.org/2000/svg';
+  function svgEl(tag, attrs){
+    const el = document.createElementNS(ns, tag);
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+  const decorGroup = svgEl('g', {});
+  for (let l=0; l<=5; l++){
+    decorGroup.appendChild(svgEl('circle', { cx:50, cy:50, r:radiusForLevel(l), class:'ringline' }));
+  }
+  const tickGroup = svgEl('g', {});
+  for (let i=0;i<32;i++){
+    const ang = (-90 + i*(360/32)) * Math.PI/180;
+    const r1 = R_OUTER+1.5, r2 = R_OUTER+3.2;
+    tickGroup.appendChild(svgEl('line', {
+      x1:50+r1*Math.cos(ang), y1:50+r1*Math.sin(ang),
+      x2:50+r2*Math.cos(ang), y2:50+r2*Math.sin(ang),
+      class:'tick'
+    }));
+  }
+  const rotatingGroup = svgEl('g', { id:'rotGroup' });
+  rotatingGroup.appendChild(decorGroup);
+  rotatingGroup.appendChild(tickGroup);
+  const branchGroup = svgEl('g', { id:'branchGroup' });
+  rotatingGroup.appendChild(branchGroup);
+  svg.appendChild(rotatingGroup);
+
+  // Pre-create one HTML pill per node.
+  function makePillEl(node){
+    const el = document.createElement('div');
+    el.className = 'pill' + (node.kind==='leaf' ? ' lvl-leaf' : '');
+    const flag = document.createElement('div');
+    flag.className = 'flag';
+    el.appendChild(flag);
+    const code = document.createElement('div');
+    code.className = 'code';
+    el.appendChild(code);
+    pillsLayer.appendChild(el);
+    return { node, el, flag, code };
+  }
+  const pillRecords = [];
+  allLeaves.forEach(leaf => pillRecords.push(makePillEl(leaf)));
+  allMatches.forEach(m => pillRecords.push(makePillEl(m)));
+
+  // Pre-create branch lines: one pair (kid0->match, kid1->match) per match.
+  const branchLines = [];
+  allMatches.forEach(m=>{
+    m.kids.forEach(kid=>{
+      const line = svgEl('path', { class:'branch' });
+      branchGroup.appendChild(line);
+      branchLines.push({ match:m, kid, line });
+    });
+  });
+
+  // ---------- RENDER ----------
+  function nodeRadius(node){
+    return node.kind==='leaf' ? R_OUTER : radiusForLevel(node.level);
+  }
+  function nodePos(node, rotation){
+    const ang = (node.angle + rotation) * Math.PI/180;
+    const r = nodeRadius(node);
+    return { x: 50 + r*Math.cos(ang), y: 50 + r*Math.sin(ang) };
+  }
+  function elbowPath(p1, p2){
+    // gentle curve toward center for a less mechanical look
+    const mx = (p1.x+p2.x)/2, my = (p1.y+p2.y)/2;
+    return `M ${p1.x} ${p1.y} Q ${mx} ${my} ${p2.x} ${p2.y}`;
+  }
+
+  function isEliminated(node){
+    const parent = parentOf.get(node);
+    if (!parent || !parent.winner) return false;
+    return resolvedTeam(node) !== parent.winner;
+  }
+  function isClickable(node){
+    const parent = parentOf.get(node);
+    if (!parent || parent.winner || parent.locked) return false;
+    const other = parent.kids.find(k=>k!==node);
+    return resolvedTeam(node)!=null && resolvedTeam(other)!=null;
+  }
+
+  function extraInfo(node){
+    // Leaves belonging to a Round-of-32 fixture: show kickoff or result.
+    const parent = parentOf.get(node);
+    if (node.kind==='leaf' && parent && parent.kids.every(k=>k.kind==='leaf')){
+      if (parent.locked){
+        const preset = PRESET_RESULTS.find(p=>p.teams.includes(node.team));
+        if (preset) return ' — ' + preset.note;
+      } else {
+        const key = parent.kids.map(k=>k.team).sort().join('|');
+        if (KICKOFF[key]) return ' — ' + KICKOFF[key];
+      }
+    }
+    return '';
+  }
+
+  function render(){
+    // position pills
+    pillRecords.forEach(rec=>{
+      const { node, el, flag, code } = rec;
+      const pos = nodePos(node, discRotation);
+      el.style.left = pos.x + '%';
+      el.style.top = pos.y + '%';
+
+      const team = resolvedTeam(node);
+      el.classList.toggle('empty', team==null);
+      el.classList.toggle('decided', node.kind==='match' && !!node.winner);
+      el.classList.toggle('eliminated', isEliminated(node));
+      el.classList.toggle('clickable', !spinning && isClickable(node));
+
+      if (team){
+        flag.textContent = TEAMS[team].flag;
+        code.textContent = TEAMS[team].code;
+        el.title = TEAMS[team].name + extraInfo(node);
+      } else {
+        flag.textContent = '';
+        code.textContent = '';
+        el.title = '';
+      }
+    });
+
+    // position branch lines
+    branchLines.forEach(b=>{
+      const p1 = nodePos(b.kid, discRotation);
+      const p2 = nodePos(b.match, discRotation);
+      b.line.setAttribute('d', elbowPath(p1,p2));
+      const lit = resolvedTeam(b.kid)!=null && b.match.winner === resolvedTeam(b.kid);
+      b.line.classList.toggle('lit', !!lit);
+    });
+
+    // champion / center
+    const champ = ROOT.winner;
+    centerMedal.classList.toggle('champion', !!champ);
+    if (champ){
+      champLabel.textContent = TEAMS[champ].flag + ' ' + TEAMS[champ].name;
+      champLabel.classList.add('show');
+    } else {
+      champLabel.classList.remove('show');
+    }
+
+    // status + progress
+    const total = allMatches.length;
+    const decided = allMatches.filter(m=>m.winner).length;
+    progressFill.style.width = (decided/total*100).toFixed(1) + '%';
+
+    if (champ){
+      statusText.innerHTML = '<b>' + TEAMS[champ].name + '</b> lifts the trophy.';
+    } else {
+      const frontier = allMatches.filter(m=>!m.winner && isClickable(m.kids[0]) && true)
+        .filter(m=>{
+          const [a,b] = m.kids;
+          return resolvedTeam(a)!=null && resolvedTeam(b)!=null;
+        });
+      const lvl = frontier.length ? Math.min(...frontier.map(m=>m.level)) : null;
+      const roundLabel = lvl ? ROUND_NAMES[lvl] : '—';
+      statusText.innerHTML = '<b>' + roundLabel + '</b> · ' + decided + ' / ' + total + ' matches decided';
+    }
+
+    spinBtn.disabled = spinning || !!champ || frontierCount()===0;
+    autoBtn.disabled = !!champ && !autoPlaying;
+  }
+
+  function frontierCount(){
+    return allMatches.filter(m=>{
+      if (m.winner) return false;
+      const [a,b] = m.kids;
+      return resolvedTeam(a)!=null && resolvedTeam(b)!=null;
+    }).length;
+  }
+
+  // ---------- INTERACTION ----------
+  pillsLayer.addEventListener('click', (e)=>{
+    const el = e.target.closest('.pill');
+    if (!el || spinning) return;
+    const rec = pillRecords.find(r=>r.el===el);
+    if (!rec) return;
+    const node = rec.node;
+    if (!isClickable(node)) return;
+    const parent = parentOf.get(node);
+    decide(parent, resolvedTeam(node));
+    render();
+  });
+
+  function decide(match, winnerTeam){
+    match.winner = winnerTeam;
+  }
+
+  function resolveFrontierRandomly(){
+    const frontier = allMatches.filter(m=>{
+      if (m.winner) return false;
+      const [a,b] = m.kids;
+      return resolvedTeam(a)!=null && resolvedTeam(b)!=null;
+    });
+    frontier.forEach(m=>{
+      const [a,b] = m.kids;
+      const winner = Math.random()<0.5 ? resolvedTeam(a) : resolvedTeam(b);
+      decide(m, winner);
+    });
+    return frontier.length;
+  }
+
+  // ---------- SPIN ANIMATION ----------
+  function easeOutCubic(t){ return 1 - Math.pow(1-t, 3); }
+
+  function spinDisc(){
+    return new Promise(resolve=>{
+      if (frontierCount()===0){ resolve(); return; }
+      spinning = true;
+      const start = discRotation;
+      const turns = 3 + Math.random()*1.5;
+      const target = start + 360*turns + Math.random()*40;
+      const duration = 2200;
+      const t0 = performance.now();
+      function step(now){
+        const t = Math.min(1, (now - t0)/duration);
+        discRotation = start + (target-start)*easeOutCubic(t);
+        render();
+        if (t < 1){
+          requestAnimationFrame(step);
+        } else {
+          spinning = false;
+          resolveFrontierRandomly();
+          render();
+          resolve();
+        }
+      }
+      requestAnimationFrame(step);
+    });
+  }
+
+  spinBtn.addEventListener('click', ()=>{
+    if (spinning) return;
+    spinDisc();
+  });
+
+  let autoPlaying = false;
+  autoBtn.addEventListener('click', async ()=>{
+    autoPlaying = !autoPlaying;
+    autoBtn.classList.toggle('on', autoPlaying);
+    autoBtn.textContent = autoPlaying ? 'Stop auto-play' : 'Auto-play';
+    while (autoPlaying && !ROOT.winner && frontierCount()>0){
+      await spinDisc();
+      await new Promise(r=>setTimeout(r, 650));
+    }
+    if (autoPlaying){
+      autoPlaying = false;
+      autoBtn.classList.remove('on');
+      autoBtn.textContent = 'Auto-play';
+    }
+  });
+
+  resetBtn.addEventListener('click', ()=>{
+    autoPlaying = false;
+    autoBtn.classList.remove('on');
+    autoBtn.textContent = 'Auto-play';
+    allMatches.forEach(m=>{ if (!m.locked) m.winner = null; });
+    discRotation = 0;
+    render();
+  });
+
+  // ---------- AMBIENT IDLE ROTATION ----------
+  let lastT = performance.now();
+  function idleLoop(now){
+    const dt = now - lastT;
+    lastT = now;
+    if (!spinning && !hovering && !reduceMotion){
+      discRotation += dt * 0.0028; // slow drift, like a dial finding its hour
+      render();
+    }
+    requestAnimationFrame(idleLoop);
+  }
+  requestAnimationFrame(idleLoop);
+
+  render();
+})();
+</script>
+</body>
+</html>
