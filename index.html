@@ -434,7 +434,7 @@
   const R_OUTER = 45, RING_STEP = 9; // percent units
   const radiusForLevel = lvl => R_OUTER - lvl*RING_STEP; // lvl 0 = leaf
 
- // ---------- BUILD TREE ----------
+   // ---------- BUILD TREE ----------
   let matchCounter = 0;
   const allMatches = [];   // every match node, in build order
   const allLeaves = [];    // leaf nodes, in circular order
@@ -598,16 +598,21 @@
   }
  
   function extraInfo(node){
-    // Leaves belonging to a Round-of-32 fixture: show kickoff or result.
     const parent = parentOf.get(node);
-    if (node.kind==='leaf' && parent && parent.kids.every(k=>k.kind==='leaf')){
-      if (parent.locked){
-        const preset = PRESET_RESULTS.find(p=>p.teams.includes(node.team));
-        if (preset) return ' — ' + preset.note;
-      } else {
-        const key = parent.kids.map(k=>k.team).sort().join('|');
-        if (KICKOFF[key]) return ' — ' + KICKOFF[key];
-      }
+    if (!parent || parent.winner) return '';
+    const team = resolvedTeam(node);
+    if (!team) return '';
+    // Show final score for locked R32 results
+    if (node.kind==='leaf' && parent.locked){
+      const preset = PRESET_RESULTS.find(p=>p.teams.includes(node.team));
+      if (preset) return ' — ' + preset.note;
+    }
+    // Show kickoff time for any round, as long as both teams are resolved
+    const [a, b] = parent.kids;
+    const ta = resolvedTeam(a), tb = resolvedTeam(b);
+    if (ta && tb){
+      const key = [ta, tb].sort().join('|');
+      if (KICKOFF[key]) return ' — ' + KICKOFF[key];
     }
     return '';
   }
@@ -729,7 +734,7 @@
       const start = discRotation;
       const turns = 3 + Math.random()*1.5;
       const target = start + 360*turns + Math.random()*40;
-      const duration = 1900;
+      const duration = 1800;
       const t0 = performance.now();
       function step(now){
         const t = Math.min(1, (now - t0)/duration);
@@ -784,7 +789,7 @@
     const dt = now - lastT;
     lastT = now;
     if (!spinning && !hovering && !reduceMotion){
-      discRotation += dt * 0.0031; // slow drift, like a dial finding its hour
+      discRotation += dt * 0.0032; // slow drift, like a dial finding its hour
       render();
     }
     requestAnimationFrame(idleLoop);
