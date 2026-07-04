@@ -63,7 +63,7 @@
     margin:0 auto;
     line-height:1.5;
   }
- 
+
   .status-bar{
     display:flex;
     align-items:center;
@@ -93,7 +93,7 @@
     width:0%;
     transition:width .5s ease;
   }
- 
+
   .stage-outer{
     position:relative;
     width:min(92vw,640px);
@@ -173,7 +173,7 @@
     transition:opacity .6s ease;
   }
   .champ-label.show{ opacity:1; }
- 
+
   .pill{
     position:absolute;
     width:7.6%;
@@ -233,12 +233,12 @@
   }
   .pill.lvl-leaf .code{ display:block; }
   .pill:not(.lvl-leaf) .code{ display:none; }
- 
+
   .ringline{ stroke:var(--ring-soft); stroke-width:.18; fill:none; }
   .tick{ stroke:var(--ring-soft); stroke-width:.25; }
   .branch{ stroke:var(--ring); stroke-width:.32; fill:none; transition:stroke .4s ease, opacity .4s ease; }
   .branch.lit{ stroke:var(--gold); opacity:.9; }
- 
+
   .controls{
     display:flex; flex-wrap:wrap;
     gap:10px; justify-content:center;
@@ -271,7 +271,7 @@
     border-color:transparent;
     color:#1a1407;
   }
- 
+
   .legend{
     display:flex; gap:18px; justify-content:center; flex-wrap:wrap;
     margin-top:18px;
@@ -282,7 +282,7 @@
   .dot.gold{ background:var(--gold-bright); }
   .dot.ember{ background:var(--ember); }
   .dot.gray{ background:var(--eliminated); }
- 
+
   .footnote{
     text-align:center;
     font-size:11px;
@@ -293,7 +293,7 @@
     opacity:.8;
   }
   .footnote b{ color:var(--ink); }
- 
+
   @media (max-width:480px){
     .pill{ width:8.6%; }
     .pill .code{ display:none !important; }
@@ -316,7 +316,7 @@
     <div class="status-text" id="statusText">Loading…</div>
     <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
   </div>
- 
+
   <div class="stage-outer" id="stageOuter">
     <div class="stage" id="stage">
       <svg class="rings" id="ringsSvg" viewBox="0 0 100 100"></svg>
@@ -326,13 +326,13 @@
       <div class="champ-label" id="champLabel"></div>
     </div>
   </div>
- 
+
   <div class="controls">
     <button class="primary" id="spinBtn">Spin the wheel</button>
     <button class="toggle" id="autoBtn">Auto-play</button>
     <button class="ghost" id="resetBtn">Reset</button>
   </div>
- 
+
   <div class="legend">
     <span><i class="dot ember"></i>Awaiting your call</span>
     <span><i class="dot gold"></i>Through to the next round</span>
@@ -381,7 +381,7 @@
     col:{name:'Colombia',code:'COL',flag:'🇨🇴',iso:'co'},
     gha:{name:'Ghana',code:'GHA',flag:'🇬🇭',iso:'gh'}
   };
- 
+
   // Nested bracket: leaf-pairs are the real Round-of-32 fixtures; each
   // further level of nesting is the next round. R32 pairings follow the
   // official fixture list. R16+ groupings follow the standard sequential
@@ -397,7 +397,7 @@
       [ [['arg','cpv'],['aus','egy']], [['sui','alg'],['col','gha']] ]
     ]
   ];
- 
+
   // Real, already-played results — locked, survive Reset.
   const PRESET_RESULTS = [
     { teams:['ger','par'], winner:'par', note:'1–1 (4–3 pens)' },
@@ -434,11 +434,11 @@
   const R_OUTER = 45, RING_STEP = 9; // percent units
   const radiusForLevel = lvl => R_OUTER - lvl*RING_STEP; // lvl 0 = leaf
 
-   // ---------- BUILD TREE ----------
+ // ---------- BUILD TREE ----------
   let matchCounter = 0;
   const allMatches = [];   // every match node, in build order
   const allLeaves = [];    // leaf nodes, in circular order
- 
+
   function findPreset(teamA, teamB){
     return PRESET_RESULTS.find(p=>{
       const s = p.teams.slice().sort().join('|');
@@ -446,7 +446,7 @@
       return s===t;
     });
   }
- 
+
   function build(node){
     if (typeof node === 'string'){
       const leaf = { kind:'leaf', team:node, angle:0 };
@@ -465,7 +465,7 @@
     return match;
   }
   const ROOT = build(BRACKET_RAW);
- 
+
   // Leaf angles, evenly spaced clockwise from the top.
   allLeaves.forEach((leaf, i)=>{
     leaf.angle = -90 + i * (360/allLeaves.length);
@@ -479,11 +479,11 @@
     return node.angle;
   }
   computeAngle(ROOT);
- 
+
   function resolvedTeam(node){
     return node.kind==='leaf' ? node.team : node.winner;
   }
- 
+
   // Map every node -> its parent match (root has none).
   const parentOf = new Map();
   (function link(node){
@@ -491,13 +491,13 @@
       node.kids.forEach(k=>{ parentOf.set(k, node); link(k); });
     }
   })(ROOT);
- 
+
   // ---------- ROTATION STATE ----------
   let discRotation = 0;
   let spinning = false;
   let hovering = false;
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
- 
+
   // ---------- DOM SETUP ----------
   const svg = document.getElementById('ringsSvg');
   const pillsLayer = document.getElementById('pillsLayer');
@@ -509,10 +509,10 @@
   const spinBtn = document.getElementById('spinBtn');
   const autoBtn = document.getElementById('autoBtn');
   const resetBtn = document.getElementById('resetBtn');
- 
+
   stageOuter.addEventListener('mouseenter', ()=> hovering = true);
   stageOuter.addEventListener('mouseleave', ()=> hovering = false);
- 
+
   // Static decorative guide circles + tick marks (built once).
   const ns = 'http://www.w3.org/2000/svg';
   function svgEl(tag, attrs){
@@ -540,7 +540,7 @@
   const branchGroup = svgEl('g', { id:'branchGroup' });
   rotatingGroup.appendChild(branchGroup);
   svg.appendChild(rotatingGroup);
- 
+
   // Pre-create one HTML pill per node.
   function makePillEl(node){
     const el = document.createElement('div');
@@ -559,7 +559,7 @@
   const pillRecords = [];
   allLeaves.forEach(leaf => pillRecords.push(makePillEl(leaf)));
   allMatches.forEach(m => pillRecords.push(makePillEl(m)));
- 
+
   // Pre-create branch lines: one pair (kid0->match, kid1->match) per match.
   const branchLines = [];
   allMatches.forEach(m=>{
@@ -569,7 +569,7 @@
       branchLines.push({ match:m, kid, line });
     });
   });
- 
+
   // ---------- RENDER ----------
   function nodeRadius(node){
     return node.kind==='leaf' ? R_OUTER : radiusForLevel(node.level);
@@ -584,7 +584,7 @@
     const mx = (p1.x+p2.x)/2, my = (p1.y+p2.y)/2;
     return `M ${p1.x} ${p1.y} Q ${mx} ${my} ${p2.x} ${p2.y}`;
   }
- 
+
   function isEliminated(node){
     const parent = parentOf.get(node);
     if (!parent || !parent.winner) return false;
@@ -596,27 +596,22 @@
     const other = parent.kids.find(k=>k!==node);
     return resolvedTeam(node)!=null && resolvedTeam(other)!=null;
   }
- 
+
   function extraInfo(node){
+    // Leaves belonging to a Round-of-32 fixture: show kickoff or result.
     const parent = parentOf.get(node);
-    if (!parent || parent.winner) return '';
-    const team = resolvedTeam(node);
-    if (!team) return '';
-    // Show final score for locked R32 results
-    if (node.kind==='leaf' && parent.locked){
-      const preset = PRESET_RESULTS.find(p=>p.teams.includes(node.team));
-      if (preset) return ' — ' + preset.note;
-    }
-    // Show kickoff time for any round, as long as both teams are resolved
-    const [a, b] = parent.kids;
-    const ta = resolvedTeam(a), tb = resolvedTeam(b);
-    if (ta && tb){
-      const key = [ta, tb].sort().join('|');
-      if (KICKOFF[key]) return ' — ' + KICKOFF[key];
+    if (node.kind==='leaf' && parent && parent.kids.every(k=>k.kind==='leaf')){
+      if (parent.locked){
+        const preset = PRESET_RESULTS.find(p=>p.teams.includes(node.team));
+        if (preset) return ' — ' + preset.note;
+      } else {
+        const key = parent.kids.map(k=>k.team).sort().join('|');
+        if (KICKOFF[key]) return ' — ' + KICKOFF[key];
+      }
     }
     return '';
   }
- 
+
   function render(){
     // position pills
     pillRecords.forEach(rec=>{
@@ -624,13 +619,13 @@
       const pos = nodePos(node, discRotation);
       el.style.left = pos.x + '%';
       el.style.top = pos.y + '%';
- 
+
       const team = resolvedTeam(node);
       el.classList.toggle('empty', team==null);
       el.classList.toggle('decided', node.kind==='match' && !!node.winner);
       el.classList.toggle('eliminated', isEliminated(node));
       el.classList.toggle('clickable', !spinning && isClickable(node));
- 
+
       if (team){
         flag.src = 'https://flagcdn.com/w80/' + TEAMS[team].iso + '.png';
         flag.alt = TEAMS[team].name;
@@ -643,7 +638,7 @@
         el.title = '';
       }
     });
- 
+
     // position branch lines
     branchLines.forEach(b=>{
       const p1 = nodePos(b.kid, discRotation);
@@ -652,7 +647,7 @@
       const lit = resolvedTeam(b.kid)!=null && b.match.winner === resolvedTeam(b.kid);
       b.line.classList.toggle('lit', !!lit);
     });
- 
+
     // champion / center
     const champ = ROOT.winner;
     centerMedal.classList.toggle('champion', !!champ);
@@ -662,12 +657,12 @@
     } else {
       champLabel.classList.remove('show');
     }
- 
+
     // status + progress
     const total = allMatches.length;
     const decided = allMatches.filter(m=>m.winner).length;
     progressFill.style.width = (decided/total*100).toFixed(1) + '%';
- 
+
     if (champ){
       statusText.innerHTML = '<b>' + TEAMS[champ].name + '</b> lifts the trophy.';
     } else {
@@ -680,11 +675,11 @@
       const roundLabel = lvl ? ROUND_NAMES[lvl] : '—';
       statusText.innerHTML = '<b>' + roundLabel + '</b> · ' + decided + ' / ' + total + ' matches decided';
     }
- 
+
     spinBtn.disabled = spinning || !!champ || frontierCount()===0;
     autoBtn.disabled = !!champ && !autoPlaying;
   }
- 
+
   function frontierCount(){
     return allMatches.filter(m=>{
       if (m.winner) return false;
@@ -692,7 +687,7 @@
       return resolvedTeam(a)!=null && resolvedTeam(b)!=null;
     }).length;
   }
- 
+
   // ---------- INTERACTION ----------
   pillsLayer.addEventListener('click', (e)=>{
     const el = e.target.closest('.pill');
@@ -705,11 +700,11 @@
     decide(parent, resolvedTeam(node));
     render();
   });
- 
+
   function decide(match, winnerTeam){
     match.winner = winnerTeam;
   }
- 
+
   function resolveFrontierRandomly(){
     const frontier = allMatches.filter(m=>{
       if (m.winner) return false;
@@ -723,10 +718,10 @@
     });
     return frontier.length;
   }
- 
+
   // ---------- SPIN ANIMATION ----------
   function easeOutCubic(t){ return 1 - Math.pow(1-t, 3); }
- 
+
   function spinDisc(){
     return new Promise(resolve=>{
       if (frontierCount()===0){ resolve(); return; }
@@ -734,7 +729,7 @@
       const start = discRotation;
       const turns = 3 + Math.random()*1.5;
       const target = start + 360*turns + Math.random()*40;
-      const duration = 1800;
+      const duration = 1900;
       const t0 = performance.now();
       function step(now){
         const t = Math.min(1, (now - t0)/duration);
@@ -752,12 +747,12 @@
       requestAnimationFrame(step);
     });
   }
- 
+
   spinBtn.addEventListener('click', ()=>{
     if (spinning) return;
     spinDisc();
   });
- 
+
   let autoPlaying = false;
   autoBtn.addEventListener('click', async ()=>{
     autoPlaying = !autoPlaying;
@@ -773,7 +768,7 @@
       autoBtn.textContent = 'Auto-play';
     }
   });
- 
+
   resetBtn.addEventListener('click', ()=>{
     autoPlaying = false;
     autoBtn.classList.remove('on');
@@ -782,20 +777,20 @@
     discRotation = 0;
     render();
   });
- 
+
   // ---------- AMBIENT IDLE ROTATION ----------
   let lastT = performance.now();
   function idleLoop(now){
     const dt = now - lastT;
     lastT = now;
     if (!spinning && !hovering && !reduceMotion){
-      discRotation += dt * 0.0032; // slow drift, like a dial finding its hour
+      discRotation += dt * 0.0031; // slow drift, like a dial finding its hour
       render();
     }
     requestAnimationFrame(idleLoop);
   }
   requestAnimationFrame(idleLoop);
- 
+
   render();
 })();
 </script>
