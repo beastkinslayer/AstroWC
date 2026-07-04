@@ -63,7 +63,6 @@
     margin:0 auto;
     line-height:1.5;
   }
-
   .status-bar{
     display:flex;
     align-items:center;
@@ -93,7 +92,6 @@
     width:0%;
     transition:width .5s ease;
   }
-
   .stage-outer{
     position:relative;
     width:min(92vw,640px);
@@ -173,7 +171,6 @@
     transition:opacity .6s ease;
   }
   .champ-label.show{ opacity:1; }
-
   .pill{
     position:absolute;
     width:7.6%;
@@ -233,12 +230,10 @@
   }
   .pill.lvl-leaf .code{ display:block; }
   .pill:not(.lvl-leaf) .code{ display:none; }
-
   .ringline{ stroke:var(--ring-soft); stroke-width:.18; fill:none; }
   .tick{ stroke:var(--ring-soft); stroke-width:.25; }
   .branch{ stroke:var(--ring); stroke-width:.32; fill:none; transition:stroke .4s ease, opacity .4s ease; }
   .branch.lit{ stroke:var(--gold); opacity:.9; }
-
   .controls{
     display:flex; flex-wrap:wrap;
     gap:10px; justify-content:center;
@@ -271,7 +266,6 @@
     border-color:transparent;
     color:#1a1407;
   }
-
   .legend{
     display:flex; gap:18px; justify-content:center; flex-wrap:wrap;
     margin-top:18px;
@@ -282,7 +276,6 @@
   .dot.gold{ background:var(--gold-bright); }
   .dot.ember{ background:var(--ember); }
   .dot.gray{ background:var(--eliminated); }
-
   .footnote{
     text-align:center;
     font-size:11px;
@@ -293,7 +286,6 @@
     opacity:.8;
   }
   .footnote b{ color:var(--ink); }
-
   @media (max-width:480px){
     .pill{ width:8.6%; }
     .pill .code{ display:none !important; }
@@ -347,7 +339,7 @@
   "use strict";
 
   // ---------- DATA ----------
-   const TEAMS = {
+  const TEAMS = {
     ger:{name:'Germany',code:'GER',flag:'🇩🇪',iso:'de'},
     par:{name:'Paraguay',code:'PAR',flag:'🇵🇾',iso:'py'},
     fra:{name:'France',code:'FRA',flag:'🇫🇷',iso:'fr'},
@@ -382,11 +374,6 @@
     gha:{name:'Ghana',code:'GHA',flag:'🇬🇭',iso:'gh'}
   };
 
-  // Nested bracket: leaf-pairs are the real Round-of-32 fixtures; each
-  // further level of nesting is the next round. R32 pairings follow the
-  // official fixture list. R16+ groupings follow the standard sequential
-  // bracket convention (confirmed correct for Canada, whose R16 opponent
-  // is the Morocco/Netherlands winner).
   const BRACKET_RAW = [
     [
       [ [['ger','par'],['fra','swe']], [['rsa','can'],['ned','mar']] ],
@@ -398,7 +385,7 @@
     ]
   ];
 
-  // Real, already-played results — locked, survive Reset.
+  // All confirmed results — locked, survive Reset.
   const PRESET_RESULTS = [
     { teams:['ger','par'], winner:'par', note:'1–1 (4–3 pens)' },
     { teams:['rsa','can'], winner:'can', note:'0–1' },
@@ -418,26 +405,27 @@
     { teams:['col','gha'], winner:'col', note:'1–0' },
   ];
 
-  // Kickoff info for matches not yet played, shown on hover.
+  // Kickoff times for upcoming matches (any round).
+  // Key = two team codes sorted and joined with |
   const KICKOFF = {
     'can|mar':'4 Jul · 20:00',
-    'par|fra':'5 Jul · 00:00',
+    'fra|par':'5 Jul · 00:00',
     'bra|nor':'5 Jul · 23:00',
-    'mex|eng':'6 Jul · 03:00',
-    'por|esp':'6 Jul · 22:00',
-    'usa|bel':'7 Jul · 03:00',
+    'eng|mex':'6 Jul · 03:00',
+    'esp|por':'6 Jul · 22:00',
+    'bel|usa':'7 Jul · 03:00',
     'arg|egy':'7 Jul · 19:00',
-    'sui|col':'7 Jul · 23:00',
+    'col|sui':'7 Jul · 23:00',
   };
 
   const ROUND_NAMES = { 1:'Round of 32', 2:'Round of 16', 3:'Quarterfinals', 4:'Semifinals', 5:'Final' };
-  const R_OUTER = 45, RING_STEP = 9; // percent units
-  const radiusForLevel = lvl => R_OUTER - lvl*RING_STEP; // lvl 0 = leaf
+  const R_OUTER = 45, RING_STEP = 9;
+  const radiusForLevel = lvl => R_OUTER - lvl*RING_STEP;
 
- // ---------- BUILD TREE ----------
+  // ---------- BUILD TREE ----------
   let matchCounter = 0;
-  const allMatches = [];   // every match node, in build order
-  const allLeaves = [];    // leaf nodes, in circular order
+  const allMatches = [];
+  const allLeaves = [];
 
   function findPreset(teamA, teamB){
     return PRESET_RESULTS.find(p=>{
@@ -466,11 +454,9 @@
   }
   const ROOT = build(BRACKET_RAW);
 
-  // Leaf angles, evenly spaced clockwise from the top.
   allLeaves.forEach((leaf, i)=>{
     leaf.angle = -90 + i * (360/allLeaves.length);
   });
-  // Match angle = midpoint of its two kids' angles (computed bottom-up).
   function computeAngle(node){
     if (node.kind==='leaf') return node.angle;
     const a = computeAngle(node.kids[0]);
@@ -484,7 +470,6 @@
     return node.kind==='leaf' ? node.team : node.winner;
   }
 
-  // Map every node -> its parent match (root has none).
   const parentOf = new Map();
   (function link(node){
     if (node.kind==='match'){
@@ -513,7 +498,6 @@
   stageOuter.addEventListener('mouseenter', ()=> hovering = true);
   stageOuter.addEventListener('mouseleave', ()=> hovering = false);
 
-  // Static decorative guide circles + tick marks (built once).
   const ns = 'http://www.w3.org/2000/svg';
   function svgEl(tag, attrs){
     const el = document.createElementNS(ns, tag);
@@ -541,7 +525,6 @@
   rotatingGroup.appendChild(branchGroup);
   svg.appendChild(rotatingGroup);
 
-  // Pre-create one HTML pill per node.
   function makePillEl(node){
     const el = document.createElement('div');
     el.className = 'pill' + (node.kind==='leaf' ? ' lvl-leaf' : '');
@@ -560,7 +543,6 @@
   allLeaves.forEach(leaf => pillRecords.push(makePillEl(leaf)));
   allMatches.forEach(m => pillRecords.push(makePillEl(m)));
 
-  // Pre-create branch lines: one pair (kid0->match, kid1->match) per match.
   const branchLines = [];
   allMatches.forEach(m=>{
     m.kids.forEach(kid=>{
@@ -580,7 +562,6 @@
     return { x: 50 + r*Math.cos(ang), y: 50 + r*Math.sin(ang) };
   }
   function elbowPath(p1, p2){
-    // gentle curve toward center for a less mechanical look
     const mx = (p1.x+p2.x)/2, my = (p1.y+p2.y)/2;
     return `M ${p1.x} ${p1.y} Q ${mx} ${my} ${p2.x} ${p2.y}`;
   }
@@ -597,23 +578,24 @@
     return resolvedTeam(node)!=null && resolvedTeam(other)!=null;
   }
 
+  // Works for any round: resolves team identities via resolvedTeam(),
+  // then checks PRESET_RESULTS for a real score, or KICKOFF for a future time.
   function extraInfo(node){
-    // Leaves belonging to a Round-of-32 fixture: show kickoff or result.
     const parent = parentOf.get(node);
-    if (node.kind==='leaf' && parent && parent.kids.every(k=>k.kind==='leaf')){
-      if (parent.locked){
-        const preset = PRESET_RESULTS.find(p=>p.teams.includes(node.team));
-        if (preset) return ' — ' + preset.note;
-      } else {
-        const key = parent.kids.map(k=>k.team).sort().join('|');
-        if (KICKOFF[key]) return ' — ' + KICKOFF[key];
-      }
-    }
+    if (!parent) return '';
+    const teamA = resolvedTeam(parent.kids[0]);
+    const teamB = resolvedTeam(parent.kids[1]);
+    if (!teamA || !teamB) return '';
+    const sorted = [teamA, teamB].sort().join('|');
+    // Real confirmed result?
+    const preset = PRESET_RESULTS.find(p => p.teams.slice().sort().join('|') === sorted);
+    if (preset) return ' — ' + preset.note;
+    // Upcoming fixture?
+    if (!parent.winner && KICKOFF[sorted]) return ' — ' + KICKOFF[sorted];
     return '';
   }
 
   function render(){
-    // position pills
     pillRecords.forEach(rec=>{
       const { node, el, flag, code } = rec;
       const pos = nodePos(node, discRotation);
@@ -639,7 +621,6 @@
       }
     });
 
-    // position branch lines
     branchLines.forEach(b=>{
       const p1 = nodePos(b.kid, discRotation);
       const p2 = nodePos(b.match, discRotation);
@@ -648,7 +629,6 @@
       b.line.classList.toggle('lit', !!lit);
     });
 
-    // champion / center
     const champ = ROOT.winner;
     centerMedal.classList.toggle('champion', !!champ);
     if (champ){
@@ -658,7 +638,6 @@
       champLabel.classList.remove('show');
     }
 
-    // status + progress
     const total = allMatches.length;
     const decided = allMatches.filter(m=>m.winner).length;
     progressFill.style.width = (decided/total*100).toFixed(1) + '%';
@@ -666,11 +645,11 @@
     if (champ){
       statusText.innerHTML = '<b>' + TEAMS[champ].name + '</b> lifts the trophy.';
     } else {
-      const frontier = allMatches.filter(m=>!m.winner && isClickable(m.kids[0]) && true)
-        .filter(m=>{
-          const [a,b] = m.kids;
-          return resolvedTeam(a)!=null && resolvedTeam(b)!=null;
-        });
+      const frontier = allMatches.filter(m=>{
+        if (m.winner) return false;
+        const [a,b] = m.kids;
+        return resolvedTeam(a)!=null && resolvedTeam(b)!=null;
+      });
       const lvl = frontier.length ? Math.min(...frontier.map(m=>m.level)) : null;
       const roundLabel = lvl ? ROUND_NAMES[lvl] : '—';
       statusText.innerHTML = '<b>' + roundLabel + '</b> · ' + decided + ' / ' + total + ' matches decided';
@@ -729,7 +708,7 @@
       const start = discRotation;
       const turns = 3 + Math.random()*1.5;
       const target = start + 360*turns + Math.random()*40;
-      const duration = 1900;
+      const duration = 1980;
       const t0 = performance.now();
       function step(now){
         const t = Math.min(1, (now - t0)/duration);
@@ -784,7 +763,7 @@
     const dt = now - lastT;
     lastT = now;
     if (!spinning && !hovering && !reduceMotion){
-      discRotation += dt * 0.0031; // slow drift, like a dial finding its hour
+      discRotation += dt * 0.00308;
       render();
     }
     requestAnimationFrame(idleLoop);
