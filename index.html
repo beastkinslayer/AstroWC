@@ -708,7 +708,7 @@
       const start = discRotation;
       const turns = 3 + Math.random()*1.5;
       const target = start + 360*turns + Math.random()*40;
-      const duration = 1980;
+      const duration = 1700;
       const t0 = performance.now();
       function step(now){
         const t = Math.min(1, (now - t0)/duration);
@@ -763,7 +763,7 @@
     const dt = now - lastT;
     lastT = now;
     if (!spinning && !hovering && !reduceMotion){
-      discRotation += dt * 0.00308;
+      discRotation += dt * 0.0032;
       render();
     }
     requestAnimationFrame(idleLoop);
