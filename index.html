@@ -409,16 +409,17 @@
     { teams:['mex','eng'], winner:'eng', note:'2–3' },
     { teams:['por','esp'], winner:'esp', note:'0–1' },
     { teams:['usa','bel'], winner:'bel', note:'1–4' },
+    { teams:['arg','egy'], winner:'arg', note:'3–2' },
+    { teams:['sui','col'], winner:'sui', note:'0–0 (4–3 pens)' },
   ];
 
   // Kickoff times for upcoming matches (any round).
   // Key = two team codes sorted and joined with |
   const KICKOFF = {
-    'arg|egy':'7 Jul · 19:00',
-    'col|sui':'7 Jul · 23:00',
     'fra|mar':'9 Jul · 23:00',
     'esp|bel':'10 Jul · 22:00',
     'nor|eng':'12 Jul · 00:00',
+    'arg|sui':'12 Jul · 04:00',
   };
 
   const ROUND_NAMES = { 1:'Round of 32', 2:'Round of 16', 3:'Quarterfinals', 4:'Semifinals', 5:'Final' };
@@ -717,7 +718,7 @@
       const start = discRotation;
       const turns = 3 + Math.random()*1.5;
       const target = start + 360*turns + Math.random()*40;
-      const duration = 1500;
+      const duration = 1200;
       const t0 = performance.now();
       function step(now){
         const t = Math.min(1, (now - t0)/duration);
